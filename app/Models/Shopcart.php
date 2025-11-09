@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Shopcart extends Model
 {
@@ -18,8 +20,14 @@ class Shopcart extends Model
     {
         return $this->belongsTo(Table::class);
     }
+    
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+    
+    public function items(): HasMany
+    {
+        return $this->hasMany(ShopcartItem::class);
     }
 }

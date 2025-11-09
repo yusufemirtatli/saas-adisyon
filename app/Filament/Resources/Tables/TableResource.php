@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Tables;
 use App\Filament\Resources\Tables\Pages\CreateTable;
 use App\Filament\Resources\Tables\Pages\EditTable;
 use App\Filament\Resources\Tables\Pages\ListTables;
+use App\Filament\Resources\Tables\Pages\PayTable;
 use App\Filament\Resources\Tables\Pages\ViewTable;
 use App\Filament\Resources\Tables\Schemas\TableForm;
 use App\Filament\Resources\Tables\Tables\TablesTable;
@@ -47,6 +48,7 @@ class TableResource extends Resource
             'create' => CreateTable::route('/create'),
             'view' => ViewTable::route('/{record}'),
             'edit' => EditTable::route('/{record}/edit'),
+            'pay' => PayTable::route('/{record}/pay'),
         ];
     }
 }

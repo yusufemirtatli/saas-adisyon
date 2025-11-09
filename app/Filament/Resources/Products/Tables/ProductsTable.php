@@ -18,8 +18,9 @@ class ProductsTable
             ->columns([
                 ImageColumn::make('image')
                     ->label('Görsel')
+                    ->disk('public')
                     ->circular()
-                    ->defaultImageUrl(url('/images/no-image.png')),
+                    ->defaultImageUrl(url('/image/null.png')),
                 TextColumn::make('name')
                     ->label('Ürün Adı')
                     ->searchable()

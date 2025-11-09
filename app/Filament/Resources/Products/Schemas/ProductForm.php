@@ -46,6 +46,9 @@ class ProductForm
                 FileUpload::make('image')
                     ->label('Ürün Görseli')
                     ->image()
+                    ->disk('public')
+                    ->directory('products')
+                    ->visibility('public')
                     ->imageEditor()
                     ->imageEditorAspectRatios([
                         '1:1',
@@ -53,8 +56,6 @@ class ProductForm
                         '16:9',
                     ])
                     ->maxSize(2048)
-                    ->directory('products')
-                    ->visibility('public')
                     ->columnSpanFull(),
                 Toggle::make('status')
                 ->label('Aktif')
