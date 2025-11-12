@@ -34,7 +34,16 @@ class ViewTable extends ViewRecord
 
     public function getPaymentUrl(): string
     {
-        return TableResource::getUrl('pay', ['record' => $this->record]);
+        // table_id'ye göre status='open' olan ilk shopcart'ı bul
+        $shopcart = Shopcart::where('table_id', $this->record->id)
+            ->where('status', 'open')
+            ->first();
+        
+        // Shopcart'ın ID'sini URL'e ekle
+        return TableResource::getUrl('pay', [
+            'record' => $this->record,
+            'shopcart' => $shopcart?->id
+        ]);
     }
 
     public function getShopcart()

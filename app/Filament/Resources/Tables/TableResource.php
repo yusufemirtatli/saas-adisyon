@@ -48,7 +48,7 @@ class TableResource extends Resource
             'create' => CreateTable::route('/create'),
             'view' => ViewTable::route('/{record}'),
             'edit' => EditTable::route('/{record}/edit'),
-            'pay' => PayTable::route('/{record}/pay'),
+            'pay' => PayTable::route('/{record}/pay/{shopcart}'),
         ];
     }
 }
