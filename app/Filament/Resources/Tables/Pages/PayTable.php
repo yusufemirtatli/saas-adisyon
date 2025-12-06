@@ -17,12 +17,23 @@ class PayTable extends ViewRecord
 
     protected static ?string $title = 'Ödeme';
 
+    // Shopcart ID'yi component property olarak sakla
+    public ?int $shopcartId = null;
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+        
+        // Sayfa yüklendiğinde shopcart ID'yi al ve property'de sakla
+        $this->shopcartId = request()->route()->parameter('shopcart');
+    }
+
     public function getShopcart()
     {
-        // URL'den shopcart ID'yi al
-        $shopcartId = request()->route('shopcart');
+        // Property'den shopcart ID'yi al (Livewire AJAX çağrılarında route parametreleri kaybolur)
+        $shopcartId = $this->shopcartId;
         
-        // URL'deki shopcart ID ile shopcart'ı getir
+        // Shopcart ID ile shopcart'ı getir
         if ($shopcartId) {
             return Shopcart::where('id', $shopcartId)
                 ->with(['items.product.productCategory'])
@@ -81,6 +92,24 @@ class PayTable extends ViewRecord
                 $shopcart->status = 'closed';
                 $shopcart->save();
             }
+            
+            // Eğer ödenen tutar toplam tutara eşit veya büyükse
+            if ($shopcart->paid_amount >= $shopcart->total_amount) {
+                // Shopcart'taki tüm itemlerin is_paid değerini 1 yap
+                ShopcartItem::where('shopcart_id', $shopcart->id)
+                    ->update(['is_paid' => true]);
+                
+                // Shopcart'ı kapat
+                $shopcart->status = 'closed';
+                $shopcart->save();
+                
+                // Masanın statusunu 'open' yap
+                $table = $shopcart->table;
+                if ($table) {
+                    $table->status = 'open';
+                    $table->save();
+                }
+            }
 
             DB::commit();
 
@@ -91,7 +120,9 @@ class PayTable extends ViewRecord
                 ->send();
 
             // Masa sayfasına yönlendir
-            return redirect(TableResource::getUrl('view', ['record' => $this->record]));
+            $redirectUrl = TableResource::getUrl('view', ['record' => $this->record]);
+            
+            return redirect($redirectUrl);
 
         } catch (\Exception $e) {
             DB::rollBack();

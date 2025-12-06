@@ -25,7 +25,8 @@ class ViewTable extends ViewRecord
     public string $viewMode = 'grouped';
     
     // Ödeme filtresi: 'all', 'unpaid', 'paid'
-    public string $paymentFilter = 'all';
+    // Varsayılan olarak sadece ödenmemiş ürünleri göster
+    public string $paymentFilter = 'unpaid';
 
     public function toggleViewMode(): void
     {
@@ -48,9 +49,12 @@ class ViewTable extends ViewRecord
 
     public function getShopcart()
     {
+        // Her zaman fresh data al (cache'leme)
         return Shopcart::where('table_id', $this->record->id)
             ->where('status', 'open')
-            ->with(['items.product.productCategory'])
+            ->with(['items' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            }, 'items.product.productCategory'])
             ->first();
     }
 
@@ -108,6 +112,10 @@ class ViewTable extends ViewRecord
         }
 
         // Masanın açık bir shopcart'ı var mı kontrol et
+        $shopcartExists = Shopcart::where('table_id', $this->record->id)
+            ->where('status', 'open')
+            ->exists();
+            
         $shopcart = Shopcart::firstOrCreate(
             [
                 'table_id' => $this->record->id,
@@ -119,6 +127,12 @@ class ViewTable extends ViewRecord
                 'created_by' => Auth::id(),
             ]
         );
+
+        // Eğer yeni shopcart oluşturulduysa, masanın statusunu 'closed' yap
+        if (!$shopcartExists) {
+            $this->record->status = 'closed';
+            $this->record->save();
+        }
 
         $totalAmount = 0;
         $itemCount = 0;

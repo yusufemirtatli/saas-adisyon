@@ -162,7 +162,6 @@
                         <x-filament::section>
                             <x-slot name="heading">
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-size: 1.5rem;">📋</span>
                                     <span style="font-weight: 700;">Ödenmemiş Ürünler</span>
                                     <span style="font-size: 0.875rem; color: #6b7280;">({{ $groupedItems->count() }} çeşit - {{ $unpaidItems->count() }} adet)</span>
                                 </div>
@@ -267,7 +266,6 @@
                         <x-filament::section>
                             <x-slot name="heading">
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="font-size: 1.5rem;">💳</span>
                                     <span style="font-weight: 700;">Ödeme Özeti</span>
                                 </div>
                             </x-slot>
@@ -289,9 +287,9 @@
                                 {{-- Ödeme Yöntemi --}}
                                 <div style="margin-bottom: 1.5rem;">
                                     <label style="display: block; font-size: 0.875rem; font-weight: 600; color: #374151; margin-bottom: 0.75rem;">
-                                        💰 Ödeme Yöntemi
+                                        Ödeme Yöntemi
                                     </label>
-                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
                                         <div class="payment-method-btn active" data-method="cash" onclick="selectPaymentMethod('cash')">
                                             <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">💵</div>
                                             <div style="font-size: 0.75rem; font-weight: 500;">Nakit</div>
@@ -299,10 +297,6 @@
                                         <div class="payment-method-btn" data-method="card" onclick="selectPaymentMethod('card')">
                                             <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">💳</div>
                                             <div style="font-size: 0.75rem; font-weight: 500;">Kart</div>
-                                        </div>
-                                        <div class="payment-method-btn" data-method="transfer" onclick="selectPaymentMethod('transfer')">
-                                            <div style="font-size: 1.5rem; margin-bottom: 0.25rem;">🏦</div>
-                                            <div style="font-size: 0.75rem; font-weight: 500;">Havale</div>
                                         </div>
                                     </div>
                                 </div>
@@ -316,7 +310,7 @@
                                         onclick="submitPayment()"
                                         disabled
                                     >
-                                        <span id="payment-icon">💵</span> ÖDEMEYE TAMAMLA 🎉
+                                        ÖDEMEYE TAMAMLA
                                     </button>
 
                                     <div style="margin-top: 0.5rem;">
@@ -475,14 +469,6 @@
                 });
                 
                 document.querySelector(`.payment-method-btn[data-method="${method}"]`).classList.add('active');
-                
-                const icons = {
-                    'cash': '💵',
-                    'card': '💳',
-                    'transfer': '🏦'
-                };
-                
-                document.getElementById('payment-icon').textContent = icons[method];
             }
 
             function updateSummary() {

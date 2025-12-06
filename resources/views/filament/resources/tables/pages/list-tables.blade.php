@@ -7,10 +7,26 @@
     {{-- Custom Grid View --}}
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
         @forelse($this->getTableRecords() as $table)
-            {{-- Masa Kartı - Yeşil Arkaplan (Müsait) - Tıklanabilir --}}
+            @php
+                // Status'e göre renk belirleme
+                $bgColor = match($table->status) {
+                    'open' => 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Yeşil
+                    'closed' => 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', // Kırmızı
+                    'reserved' => 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', // Sarı
+                    default => 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)', // Gri (fallback)
+                };
+                $iconColor = match($table->status) {
+                    'open' => '#059669',
+                    'closed' => '#dc2626',
+                    'reserved' => '#d97706',
+                    default => '#4b5563',
+                };
+            @endphp
+            
+            {{-- Masa Kartı - Status'e Göre Renkli --}}
             <a 
                 href="{{ \App\Filament\Resources\Tables\TableResource::getUrl('view', ['record' => $table]) }}"
-                style="position: relative; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 12px; padding: 2rem 1rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); min-height: 140px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s; cursor: pointer;"
+                style="position: relative; background: {{ $bgColor }}; border-radius: 12px; padding: 2rem 1rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); min-height: 140px; display: flex; align-items: center; justify-content: center; text-decoration: none; transition: all 0.3s; cursor: pointer;"
                 onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 12px rgba(0, 0, 0, 0.15)';"
                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.1)';"
             >
@@ -22,7 +38,7 @@
                     onmouseover="this.style.background='rgba(255, 255, 255, 1)'; this.style.transform='scale(1.1)';"
                     onmouseout="this.style.background='rgba(255, 255, 255, 0.9)'; this.style.transform='scale(1)';"
                 >
-                    <svg style="width: 16px; height: 16px; color: #059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style="width: 16px; height: 16px; color: {{ $iconColor }};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </span>

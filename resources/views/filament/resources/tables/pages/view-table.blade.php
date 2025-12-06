@@ -4,6 +4,12 @@
     {{-- Adisyon İçeriği --}}
     @php
         $shopcart = $this->getShopcart();
+        
+        // DEBUG: Shopcart yeniden yükle (cache bypass)
+        if ($shopcart) {
+            $shopcart->refresh();
+            $shopcart->load(['items.product.productCategory']);
+        }
     @endphp
 
     @if($shopcart && $shopcart->items->count() > 0)
@@ -94,8 +100,13 @@
                     }
                     
                     // Sonra ürünleri grupla
-                    $groupedItems = $filteredItems->groupBy('product_id')->map(function($items) {
+                    $groupedItems = $filteredItems->groupBy('product_id')->map(function($items) use ($shopcart) {
                         $firstItem = $items->first();
+                        
+                        // Bu ürünün tüm itemlerini al (filtresiz)
+                        $allItemsForProduct = $shopcart->items->where('product_id', $firstItem->product_id);
+                        $paidCount = $allItemsForProduct->where('is_paid', 1)->count();
+                        
                         return [
                             'product' => $firstItem->product,
                             'unit_price' => $firstItem->unit_price,
@@ -103,6 +114,7 @@
                             'total_price' => $items->sum('unit_price'),
                             'has_note' => $items->whereNotNull('note')->isNotEmpty(),
                             'notes' => $items->whereNotNull('note')->pluck('note')->unique(),
+                            'paid_count' => $paidCount,
                         ];
                     });
                 @endphp
@@ -145,6 +157,12 @@
                                         {{ $item['product']->name }}
                                         @if($item['quantity'] > 1)
                                             <span style="color: #059669; font-weight: 700;">x{{ $item['quantity'] }}</span>
+                                        @endif
+                                        {{-- Ödenen sayısını sadece "Tümü" sekmesinde göster --}}
+                                        @if($this->paymentFilter === 'all' && $item['paid_count'] > 0)
+                                            <span style="display: inline-block; margin-left: 0.5rem; padding: 0.25rem 0.5rem; background: #fee2e2; color: #991b1b; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 600;">
+                                                x{{ $item['paid_count'] }} Ödendi
+                                            </span>
                                         @endif
                                     </h3>
                                     <p style="font-size: 0.875rem; color: #6b7280;">
