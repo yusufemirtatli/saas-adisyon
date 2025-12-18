@@ -20,6 +20,7 @@ class ViewTable extends ViewRecord
 
     // Shopping cart state
     public array $cart = [];
+    public array $cartNotes = [];
     
     // Görünüm modu: 'grouped' veya 'detailed'
     public string $viewMode = 'grouped';
@@ -74,6 +75,20 @@ class ViewTable extends ViewRecord
                     'products' => Product::where('status', true)->with('productCategory')->get(),
                 ]))
                 ->extraModalFooterActions([
+                    Action::make('addNotes')
+                        ->label('Not Ekle')
+                        ->color('warning')
+                        ->disabled(fn () => empty($this->cart))
+                        ->modalHeading('Ürünlere Not Ekle')
+                        ->modalWidth('3xl')
+                        ->modalSubmitActionLabel('Tamam')
+                        ->modalCancelActionLabel('İptal')
+                        ->modalContent(fn () => view('filament.resources.tables.components.product-notes-selector', [
+                            'cart' => $this->cart,
+                            'products' => Product::whereIn('id', array_keys($this->cart))->get(),
+                            'cartNotes' => $this->cartNotes,
+                        ]))
+                        ->action(fn () => null),
                     Action::make('saveCart')
                         ->label('Kaydet')
                         ->color('success')
@@ -96,8 +111,17 @@ class ViewTable extends ViewRecord
             $this->cart[$productId]--;
             if ($this->cart[$productId] === 0) {
                 unset($this->cart[$productId]);
+                unset($this->cartNotes[$productId]);
             }
         }
+    }
+
+    public function updateNote(int $productId, int $index, string $note): void
+    {
+        if (!isset($this->cartNotes[$productId])) {
+            $this->cartNotes[$productId] = [];
+        }
+        $this->cartNotes[$productId][$index] = $note;
     }
 
     public function saveCart(): void
@@ -143,11 +167,14 @@ class ViewTable extends ViewRecord
             if (!$product) continue;
 
             for ($i = 0; $i < $quantity; $i++) {
+                $note = $this->cartNotes[$productId][$i] ?? null;
+                
                 ShopcartItem::create([
                     'shopcart_id' => $shopcart->id,
                     'product_id' => $product->id,
                     'unit_price' => $product->price,
                     'is_paid' => false,
+                    'note' => $note,
                 ]);
                 $totalAmount += $product->price;
                 $itemCount++;
@@ -160,6 +187,7 @@ class ViewTable extends ViewRecord
 
         // Sepeti temizle
         $this->cart = [];
+        $this->cartNotes = [];
 
         Notification::make()
             ->success()
@@ -172,4 +200,5 @@ class ViewTable extends ViewRecord
         $this->redirect($this->getResource()::getUrl('view', ['record' => $this->record]));
     }
 }
+
 

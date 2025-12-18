@@ -24,6 +24,19 @@ class ProductForm
                     ->placeholder('Örn: Çay, Kahve, Hamburger')
                     ->required()
                     ->maxLength(255),
+                Select::make('product_category_id')
+                    ->label('Kategori')
+                    ->relationship('productCategory', 'name')
+                    ->required()
+                    ->searchable()
+                    ->preload(),
+                TextInput::make('cost')
+                    ->label('Maliyet')
+                    ->required()
+                    ->numeric()
+                    ->prefix('₺')
+                    ->step(0.01)
+                    ->minValue(0),
                 TextInput::make('price')
                     ->label('Fiyat')
                     ->required()
@@ -31,13 +44,6 @@ class ProductForm
                     ->prefix('₺')
                     ->step(0.01)
                     ->minValue(0),
-                Select::make('product_category_id')
-                    ->label('Kategori')
-                    ->relationship('productCategory', 'name')
-                    ->required()
-                    ->columnSpanFull()
-                    ->searchable()
-                    ->preload(),
                 Textarea::make('description')
                     ->label('Açıklama')
                     ->placeholder('Ürün hakkında detaylı bilgi')

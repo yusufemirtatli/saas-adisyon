@@ -11,6 +11,7 @@ class Product extends Model
         'team_id',
         'name',
         'price',
+        'cost',
         'description',
         'image',
         'status',

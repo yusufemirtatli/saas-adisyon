@@ -259,6 +259,110 @@
                                 @endforeach
                             </div>
                         </x-filament::section>
+
+                        {{-- Alt Panel: Toplam ve İşlem Butonları --}}
+                        @php
+                            $totalTableAmount = $shopcart->total_amount ?? 0;
+                            $paidAmount = $shopcart->paid_amount ?? 0;
+                            $remainingAmount = $totalTableAmount - $paidAmount;
+                        @endphp
+                        <div style="margin-top: 1rem; background: white; border: 2px solid #e5e7eb; border-radius: 0.75rem; padding: 1rem;">
+                            {{-- Toplam Tutarlar --}}
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+                                <div>
+                                    <p style="color: #6b7280; font-size: 0.7rem; font-weight: 500; margin: 0; text-transform: uppercase;">Masa Toplam</p>
+                                    <p style="color: #111827; font-size: 1.5rem; font-weight: 800; margin: 0;">{{ number_format($totalTableAmount, 2) }} ₺</p>
+                                </div>
+                                <div style="display: flex; gap: 1rem;">
+                                    <div style="text-align: center; padding: 0.4rem 0.75rem; background: #dcfce7; border-radius: 0.5rem; border: 1px solid #bbf7d0;">
+                                        <p style="color: #166534; font-size: 0.6rem; font-weight: 600; margin: 0;">ÖDENEN</p>
+                                        <p style="color: #16a34a; font-size: 0.95rem; font-weight: 700; margin: 0;">{{ number_format($paidAmount, 2) }} ₺</p>
+                                    </div>
+                                    <div style="text-align: center; padding: 0.4rem 0.75rem; background: #ffedd5; border-radius: 0.5rem; border: 1px solid #fed7aa;">
+                                        <p style="color: #9a3412; font-size: 0.6rem; font-weight: 600; margin: 0;">KALAN</p>
+                                        <p style="color: #ea580c; font-size: 0.95rem; font-weight: 700; margin: 0;">{{ number_format($remainingAmount, 2) }} ₺</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- İşlem Butonları --}}
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <button 
+                                    type="button" 
+                                    onclick="closeAccount()"
+                                    style="padding: 0.5rem; background: linear-gradient(135deg, #059669, #047857); color: white; border: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: all 0.15s;" 
+                                    onmouseover="this.style.transform='translateY(-1px)'" 
+                                    onmouseout="this.style.transform='translateY(0)'"
+                                >
+                                    Hesabı Kapat
+                                </button>
+                                <button type="button" style="padding: 0.5rem; background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.75rem; cursor: pointer; transition: all 0.15s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    Veresiye Yaz
+                                </button>
+                            </div>
+
+                            {{-- Hesaptan Düş & Hesabı Böl --}}
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                {{-- Sol: Hesaptan Düş --}}
+                                <div>
+                                    <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Hesaptan Düş</label>
+                                    <div style="display: flex; gap: 0.35rem;">
+                                        <div style="flex: 1; position: relative;">
+                                            <input 
+                                                type="number" 
+                                                id="custom-amount-input"
+                                                placeholder="0.00"
+                                                min="0"
+                                                step="0.01"
+                                                style="width: 100%; padding: 0.4rem 0.5rem; padding-right: 1.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; outline: none; transition: border-color 0.15s;"
+                                                onfocus="this.style.borderColor='#3b82f6'"
+                                                onblur="this.style.borderColor='#d1d5db'"
+                                            >
+                                            <span style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.75rem; font-weight: 600;">₺</span>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onclick="applyCustomAmount()"
+                                            style="padding: 0.4rem 0.6rem; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 0.375rem; font-weight: 600; font-size: 0.7rem; cursor: pointer; transition: all 0.15s;"
+                                            onmouseover="this.style.transform='translateY(-1px)'"
+                                            onmouseout="this.style.transform='translateY(0)'"
+                                        >
+                                            Düş
+                                        </button>
+                                    </div>
+                                </div>
+                                {{-- Sağ: Hesabı Böl --}}
+                                <div>
+                                    <label style="display: block; font-size: 0.7rem; font-weight: 600; color: #374151; margin-bottom: 0.35rem;">Hesabı Böl</label>
+                                    <div style="display: flex; gap: 0.35rem;">
+                                        <div style="flex: 1; position: relative;">
+                                            <input 
+                                                type="number" 
+                                                id="split-amount-input"
+                                                placeholder="2"
+                                                min="1"
+                                                step="1"
+                                                style="width: 100%; padding: 0.4rem 0.5rem; padding-right: 2rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 0.85rem; font-weight: 600; outline: none; transition: border-color 0.15s;"
+                                                onfocus="this.style.borderColor='#7c3aed'"
+                                                onblur="this.style.borderColor='#d1d5db'"
+                                                oninput="updateSplitPreview()"
+                                            >
+                                            <span style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 0.7rem; font-weight: 600;">kişi</span>
+                                        </div>
+                                        <button 
+                                            type="button" 
+                                            onclick="applySplitAmount()"
+                                            style="padding: 0.4rem 0.6rem; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; border: none; border-radius: 0.375rem; font-weight: 600; font-size: 0.7rem; cursor: pointer; transition: all 0.15s;"
+                                            onmouseover="this.style.transform='translateY(-1px)'"
+                                            onmouseout="this.style.transform='translateY(0)'"
+                                        >
+                                            Böl
+                                        </button>
+                                    </div>
+                                    <p id="split-preview" style="font-size: 0.65rem; color: #6b7280; margin: 0.25rem 0 0 0;">Kişi başı: <span style="font-weight: 700; color: #7c3aed;">{{ number_format($remainingAmount / 2, 2) }} ₺</span></p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Sağ Panel: Ödeme Özeti --}}
@@ -345,6 +449,46 @@
         <script>
             let selectedGroups = {}; // { idsString: { ids: [], quantity: 0, unitPrice: 0 } }
             let paymentMethod = 'cash';
+            
+            // Hesaptan düş fonksiyonu (şimdilik sadece tasarım)
+            function applyCustomAmount() {
+                const input = document.getElementById('custom-amount-input');
+                const amount = parseFloat(input.value);
+                if (amount && amount > 0) {
+                    console.log('Hesaptan düşülecek tutar:', amount, '₺');
+                    // İleride işlevsellik eklenecek
+                }
+            }
+            
+            // Hesabı böl önizleme
+            const remainingAmount = {{ $remainingAmount }};
+            function updateSplitPreview() {
+                const input = document.getElementById('split-amount-input');
+                const preview = document.getElementById('split-preview');
+                const splitBy = parseInt(input.value) || 2;
+                if (splitBy > 0) {
+                    const perPerson = remainingAmount / splitBy;
+                    preview.innerHTML = 'Kişi başı: <span style="font-weight: 700; color: #7c3aed;">' + perPerson.toFixed(2) + ' ₺</span>';
+                }
+            }
+            
+            // Hesabı böl fonksiyonu (şimdilik sadece tasarım)
+            function applySplitAmount() {
+                const input = document.getElementById('split-amount-input');
+                const splitBy = parseInt(input.value) || 2;
+                if (splitBy > 0) {
+                    const perPerson = remainingAmount / splitBy;
+                    console.log('Hesap', splitBy, 'kişiye bölündü. Kişi başı:', perPerson.toFixed(2), '₺');
+                    // İleride işlevsellik eklenecek
+                }
+            }
+            
+            // Hesabı Kapat - Tüm ürünleri ödenmiş yapar ve shopcart'ı kapatır
+            function closeAccount() {
+                if (confirm('Hesabı kapatmak istediğinize emin misiniz? Tüm ürünler ödenmiş olarak işaretlenecek.')) {
+                    @this.call('closeAccount', paymentMethod);
+                }
+            }
 
             function changeQuantity(itemIds, change) {
                 const idsString = JSON.stringify(itemIds);

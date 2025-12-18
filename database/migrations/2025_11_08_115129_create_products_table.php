@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('product_category_id');
             $table->string('image')->nullable();
             $table->string('status')->default('active');
+            $table->decimal('cost', 10, 2)->default(0);
             $table->decimal('price', 10, 2);
             $table->timestamps();
         });

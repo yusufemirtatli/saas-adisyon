@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('unit_price', 10, 2);
             $table->boolean('is_paid')->default(false);
+            $table->string('payment_type')->nullable();
             $table->string('note')->nullable();
             $table->timestamps();
         });

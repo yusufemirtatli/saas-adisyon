@@ -73,8 +73,12 @@ class PayTable extends ViewRecord
                 ->get();
 
             $totalPaid = 0;
+            // payment_type değerini belirle (cash veya credit_card)
+            $paymentTypeValue = $paymentMethod === 'card' ? 'credit_card' : 'cash';
+            
             foreach ($items as $item) {
                 $item->is_paid = true;
+                $item->payment_type = $paymentTypeValue;
                 $item->save();
                 $totalPaid += $item->unit_price;
             }
@@ -131,6 +135,76 @@ class PayTable extends ViewRecord
                 ->danger()
                 ->title('Hata')
                 ->body('Ödeme işlemi sırasında bir hata oluştu: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Hesabı Kapat - Tüm ürünleri ödenmiş olarak işaretle ve shopcart'ı kapat
+     */
+    public function closeAccount($paymentMethod = 'cash')
+    {
+        $shopcart = $this->getShopcart();
+        
+        if (!$shopcart) {
+            Notification::make()
+                ->danger()
+                ->title('Hata')
+                ->body('Adisyon bulunamadı.')
+                ->send();
+            return;
+        }
+
+        DB::beginTransaction();
+        try {
+            // payment_type değerini belirle (cash veya credit_card)
+            $paymentTypeValue = $paymentMethod === 'card' ? 'credit_card' : 'cash';
+            
+            // Tüm ödenmemiş ürünleri al
+            $unpaidItems = ShopcartItem::where('shopcart_id', $shopcart->id)
+                ->where('is_paid', false)
+                ->get();
+            
+            $totalPaid = 0;
+            foreach ($unpaidItems as $item) {
+                $item->is_paid = true;
+                $item->payment_type = $paymentTypeValue;
+                $item->save();
+                $totalPaid += $item->unit_price;
+            }
+            
+            // Shopcart'ı güncelle
+            $shopcart->paid_amount = $shopcart->total_amount;
+            $shopcart->status = 'closed';
+            $shopcart->save();
+            
+            // Masanın statusunu 'open' yap
+            $table = $shopcart->table;
+            if ($table) {
+                $table->status = 'open';
+                $table->save();
+            }
+
+            DB::commit();
+
+            Notification::make()
+                ->success()
+                ->title('Hesap Kapatıldı!')
+                ->body('Toplam ' . number_format($totalPaid, 2) . ' ₺ ödeme alındı. Hesap kapatıldı.')
+                ->send();
+
+            // Masa sayfasına yönlendir
+            $redirectUrl = TableResource::getUrl('view', ['record' => $this->record]);
+            
+            return redirect($redirectUrl);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Notification::make()
+                ->danger()
+                ->title('Hata')
+                ->body('Hesap kapatılırken bir hata oluştu: ' . $e->getMessage())
                 ->send();
         }
     }

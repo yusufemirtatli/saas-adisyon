@@ -12,6 +12,8 @@ class ShopcartItem extends Model
         'product_id',
         'unit_price',
         'is_paid',
+        'payment_type',
+        'kitchen_status',
         'note',
     ];
 
